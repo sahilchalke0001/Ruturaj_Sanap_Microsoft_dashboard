@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft FY24 ESG Dashboard | Ruturaj Sanap 22102B0050</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #09090f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --ms-blue: #00a4ef;
+    --ms-green: #7fba00;
+    --ms-yellow: #ffb900;
+    --ms-red: #f25022;
+    --accent: #00a4ef;
+    --critical: #f25022;
+    --high: #ffb900;
+    --medium: #00a4ef;
+    --low: #7fba00;
+    --card-radius: 12px;
+    --glow: 0 0 40px rgba(0,164,239,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,164,239,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,164,239,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 28px 40px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,164,239,0.06) 0%, transparent 100%);
+  }
+  .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .header-left {}
+  .ms-logo { display: flex; gap: 3px; margin-bottom: 14px; }
+  .ms-logo span { display: block; width: 18px; height: 18px; border-radius: 2px; }
+  .ms-logo .r { background: #f25022; }
+  .ms-logo .g { background: #7fba00; }
+  .ms-logo .b { background: #00a4ef; }
+  .ms-logo .y { background: #ffb900; }
+  .header-title { font-family: 'Syne', sans-serif; font-size: clamp(20px,3vw,32px); font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+  .header-title span { color: var(--ms-blue); }
+  .header-sub { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
+  .header-right { text-align: right; }
+  .student-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .student-badge strong { display: block; font-family: 'Syne', sans-serif; font-size: 13px; color: var(--text); font-weight: 600; margin-bottom: 2px; }
+  .fy-badge {
+    margin-top: 8px;
+    display: inline-block;
+    background: linear-gradient(135deg, var(--ms-blue), #0078d4);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* ── MAIN ── */
+  main { max-width: 1400px; margin: 0 auto; padding: 32px 40px 60px; position: relative; z-index: 1; }
+
+  /* ── KPI STRIP ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 36px; }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: rgba(0,164,239,0.3); }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .kpi-card.blue::before { background: linear-gradient(90deg, var(--ms-blue), transparent); }
+  .kpi-card.green::before { background: linear-gradient(90deg, var(--ms-green), transparent); }
+  .kpi-card.yellow::before { background: linear-gradient(90deg, var(--ms-yellow), transparent); }
+  .kpi-card.red::before { background: linear-gradient(90deg, var(--ms-red), transparent); }
+  .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+  .kpi-value.blue { color: var(--ms-blue); }
+  .kpi-value.green { color: var(--ms-green); }
+  .kpi-value.yellow { color: var(--ms-yellow); }
+  .kpi-value.red { color: var(--ms-red); }
+  .kpi-sub { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab-btn .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .tab-btn:hover { color: var(--text); background: var(--surface); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); background: var(--surface); }
+  .tab-btn.env .dot { background: var(--ms-green); }
+  .tab-btn.soc .dot { background: var(--ms-blue); }
+  .tab-btn.gov .dot { background: var(--ms-yellow); }
+  .tab-btn.sup .dot { background: var(--ms-red); }
+
+  /* ── PANELS ── */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── SECTION HEADING ── */
+  .section-heading { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+  /* ── 2-COL CHARTS GRID ── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 22px;
+    box-shadow: var(--glow);
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 16px; color: var(--text); }
+  .chart-canvas-wrap { position: relative; height: 240px; }
+
+  /* ── TABLE ── */
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); overflow: hidden; margin-bottom: 28px; }
+  .table-toolbar { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .table-toolbar input {
+    flex: 1; min-width: 160px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .table-toolbar input:focus { border-color: var(--ms-blue); }
+  .table-toolbar select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+  }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th {
+    background: var(--surface2);
+    padding: 11px 14px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--text); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.4; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge.critical { background: rgba(242,80,34,0.15); color: #f25022; border: 1px solid rgba(242,80,34,0.3); }
+  .badge.high { background: rgba(255,185,0,0.15); color: #ffb900; border: 1px solid rgba(255,185,0,0.3); }
+  .badge.medium { background: rgba(0,164,239,0.15); color: #00a4ef; border: 1px solid rgba(0,164,239,0.3); }
+  .badge.low { background: rgba(127,186,0,0.15); color: #7fba00; border: 1px solid rgba(127,186,0,0.3); }
+  .badge.yes { background: rgba(127,186,0,0.1); color: #7fba00; border: 1px solid rgba(127,186,0,0.2); }
+  .badge.no { background: rgba(255,185,0,0.1); color: #ffb900; border: 1px solid rgba(255,185,0,0.2); }
+
+  /* ── PAGINATION ── */
+  .pagination { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+  .page-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.2s;
+  }
+  .page-btn:hover, .page-btn.active { background: var(--ms-blue); border-color: var(--ms-blue); color: #fff; }
+  .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* ── SUMMARY STATS ROW ── */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 10px; margin-bottom: 28px; }
+  .stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-mini-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .stat-mini-lab { font-size: 9px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px 40px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    position: relative; z-index: 1;
+  }
+  footer strong { color: var(--ms-blue); }
+
+  @media (max-width: 768px) {
+    main { padding: 20px; }
+    header { padding: 20px; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .charts-grid .chart-card.wide { grid-column: 1; }
+    .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="ms-logo">
+        <span class="r"></span><span class="g"></span>
+        <span class="b"></span><span class="y"></span>
+      </div>
+      <div class="header-title">Microsoft <span>FY24</span> ESG Dashboard</div>
+      <div class="header-sub">Environmental · Social · Governance · Supply Chain</div>
+    </div>
+    <div class="header-right">
+      <div class="student-badge">
+        <strong>Ruturaj Sanap</strong>
+        Roll No: 22102B0050
+        <div class="fy-badge">FY 2024</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value green">$281.7B</div>
+      <div class="kpi-sub">FY25 Record High</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Carbon Removal</div>
+      <div class="kpi-value blue">22M</div>
+      <div class="kpi-sub">Tonnes Contracted</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Renewable Capacity</div>
+      <div class="kpi-value green">34 GW</div>
+      <div class="kpi-sub">Global Portfolio</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">Women in Workforce</div>
+      <div class="kpi-value yellow">31.6%</div>
+      <div class="kpi-sub">+0.4% YoY</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">GenAI Trained</div>
+      <div class="kpi-value blue">3M+</div>
+      <div class="kpi-sub">People Upskilled</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">Board Independence</div>
+      <div class="kpi-value yellow">91%</div>
+      <div class="kpi-sub">11 of 12 Directors</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Security Engineers</div>
+      <div class="kpi-value red">34K</div>
+      <div class="kpi-sub">FTE Equivalent</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Supplier SCoC</div>
+      <div class="kpi-value green">100%</div>
+      <div class="kpi-sub">Code of Conduct</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn env active" onclick="switchTab('env')"><span class="dot"></span>Environment</button>
+    <button class="tab-btn soc" onclick="switchTab('soc')"><span class="dot"></span>Social</button>
+    <button class="tab-btn gov" onclick="switchTab('gov')"><span class="dot"></span>Governance</button>
+    <button class="tab-btn sup" onclick="switchTab('sup')"><span class="dot"></span>Supply Chain</button>
+  </div>
+
+  <!-- ══════════════ ENVIRONMENT PANEL ══════════════ -->
+  <div class="panel active" id="panel-env">
+    <div class="section-heading">Environmental KPIs — Carbon, Energy, Water, Waste, Ecosystems</div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Carbon Priority Distribution</div>
+        <div class="chart-canvas-wrap"><canvas id="envPriorityChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ESG Category Breakdown</div>
+        <div class="chart-canvas-wrap"><canvas id="envCategoryChart"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <div class="chart-title">Carbon Emissions Estimates (mtCO₂e) by Scope</div>
+        <div class="chart-canvas-wrap"><canvas id="emissionsChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar">
+        <input type="text" id="env-search" placeholder="Search KPI, category, audit point…" oninput="filterTable('env')">
+        <select id="env-filter-priority" onchange="filterTable('env')">
+          <option value="">All Priorities</option>
+          <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+        <select id="env-filter-cat" onchange="filterTable('env')">
+          <option value="">All Categories</option>
+          <option>Carbon</option><option>Energy</option><option>Water</option><option>Waste</option><option>Ecosystems</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="env-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('env',0)">Category ↕</th>
+              <th onclick="sortTable('env',1)">Audit Point ↕</th>
+              <th onclick="sortTable('env',2)">KPI</th>
+              <th onclick="sortTable('env',3)">Target</th>
+              <th onclick="sortTable('env',4)">Gap Analysis</th>
+              <th onclick="sortTable('env',5)">Priority ↕</th>
+              <th onclick="sortTable('env',6)">Owner</th>
+            </tr>
+          </thead>
+          <tbody id="env-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="env-pages"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SOCIAL PANEL ══════════════ -->
+  <div class="panel" id="panel-soc">
+    <div class="section-heading">Social KPIs — Diversity, Inclusion, Pay Equity, Training, Community</div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Women Representation by Level (%)</div>
+        <div class="chart-canvas-wrap"><canvas id="womenChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">US Diversity Demographics (%)</div>
+        <div class="chart-canvas-wrap"><canvas id="diversityChart"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <div class="chart-title">Moderation Levels Across Social Metrics</div>
+        <div class="chart-canvas-wrap"><canvas id="socModChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar">
+        <input type="text" id="soc-search" placeholder="Search metric, category…" oninput="filterTable('soc')">
+        <select id="soc-filter-area" onchange="filterTable('soc')">
+          <option value="">All Areas</option>
+          <option>Global Demographics</option><option>US Demographics</option>
+          <option>Inclusion</option><option>Pay Equity</option>
+          <option>Training</option><option>Sentiment</option>
+          <option>Hiring</option><option>Skilling</option><option>Community</option>
+        </select>
+        <select id="soc-filter-mod" onchange="filterTable('soc')">
+          <option value="">All Levels</option>
+          <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="soc-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('soc',0)">Area ↕</th>
+              <th onclick="sortTable('soc',1)">Metric ↕</th>
+              <th onclick="sortTable('soc',2)">Current %</th>
+              <th onclick="sortTable('soc',3)">Target</th>
+              <th onclick="sortTable('soc',4)">Gap Description</th>
+              <th onclick="sortTable('soc',5)">Level ↕</th>
+            </tr>
+          </thead>
+          <tbody id="soc-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="soc-pages"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ GOVERNANCE PANEL ══════════════ -->
+  <div class="panel" id="panel-gov">
+    <div class="section-heading">Governance — Financial, Board, Ethics, Security, Privacy, AI</div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Risk Level Distribution</div>
+        <div class="chart-canvas-wrap"><canvas id="govRiskChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Financial Performance ($B)</div>
+        <div class="chart-canvas-wrap"><canvas id="govFinChart"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <div class="chart-title">Governance Areas — Metric Count by Domain</div>
+        <div class="chart-canvas-wrap"><canvas id="govAreaChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar">
+        <input type="text" id="gov-search" placeholder="Search metric, area, status…" oninput="filterTable('gov')">
+        <select id="gov-filter-area" onchange="filterTable('gov')">
+          <option value="">All Areas</option>
+          <option>Financial</option><option>Board</option><option>Committees</option>
+          <option>Ethics</option><option>Security</option><option>Privacy</option>
+          <option>Responsible AI</option><option>Policy</option><option>Tax</option>
+        </select>
+        <select id="gov-filter-risk" onchange="filterTable('gov')">
+          <option value="">All Risk Levels</option>
+          <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="gov-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('gov',0)">Area ↕</th>
+              <th onclick="sortTable('gov',1)">Metric ↕</th>
+              <th onclick="sortTable('gov',2)">Value</th>
+              <th onclick="sortTable('gov',3)">Policy</th>
+              <th onclick="sortTable('gov',4)">Status</th>
+              <th onclick="sortTable('gov',5)">Risk ↕</th>
+            </tr>
+          </thead>
+          <tbody id="gov-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="gov-pages"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SUPPLY CHAIN PANEL ══════════════ -->
+  <div class="panel" id="panel-sup">
+    <div class="section-heading">Supply Chain ESG — Supplier Assessments, Labor, Environment, Diversity</div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Moderation Level Distribution</div>
+        <div class="chart-canvas-wrap"><canvas id="supModChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">High-Risk Assessment Coverage</div>
+        <div class="chart-canvas-wrap"><canvas id="supHighRiskChart"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <div class="chart-title">Supply Chain Assessment Items by Moderation Level</div>
+        <div class="chart-canvas-wrap"><canvas id="supBarChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar">
+        <input type="text" id="sup-search" placeholder="Search assessment, gap…" oninput="filterTable('sup')">
+        <select id="sup-filter-mod" onchange="filterTable('sup')">
+          <option value="">All Levels</option>
+          <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+        <select id="sup-filter-risk" onchange="filterTable('sup')">
+          <option value="">100% High Risk?</option>
+          <option>Yes</option><option>No</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="sup-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('sup',0)">ESG Assessment ↕</th>
+              <th onclick="sortTable('sup',1)">Suppliers Assessed</th>
+              <th onclick="sortTable('sup',2)">Records</th>
+              <th onclick="sortTable('sup',3)">100% High Risk</th>
+              <th onclick="sortTable('sup',4)">Current Status</th>
+              <th onclick="sortTable('sup',5)">Gap Description</th>
+              <th onclick="sortTable('sup',6)">Level ↕</th>
+            </tr>
+          </thead>
+          <tbody id="sup-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="sup-pages"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Microsoft FY24 Detailed ESG Data Dashboard &mdash; Prepared by <strong>Ruturaj Sanap</strong> (22102B0050) &mdash; Data Source: 2025 Sustainability Report
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════
+const ENV_DATA = [
+  ["Carbon","Total Footprint","Total Emissions (Scope 1+2+3)","Carbon Negative by 2030","Increased 23.4% vs 2020 baseline (AI Growth)","Critical","Chief Sustainability Officer"],
+  ["Carbon","Direct Ops","Scope 1 Emissions","Near Zero","Reduced 29.9% (Combined S1+S2 vs 2020)","High","Ops / Azure Engineering"],
+  ["Carbon","Electricity","Scope 2 (Market-Based)","100% RE Supply","456,119 mtCO2e (Residual)","High","Energy Procurement Team"],
+  ["Carbon","Electricity","Scope 2 (Location-Based)","Track Grid Intensity","9,955,368 mtCO2e (Grid avg)","Medium","Energy Procurement Team"],
+  ["Carbon","Supply Chain","Scope 3 (Total)","-50% by 2030","Increased due to capital goods/construction","Critical","Supply Chain Leadership"],
+  ["Carbon","Supply Chain","Scope 3: Purchased Goods","Reduce Intensity","~8.1M mtCO2e (Largest contributor)","Critical","Devices & Hardware Supply Chain"],
+  ["Carbon","Supply Chain","Scope 3: Use of Sold Products","Energy Efficiency","2.1M mtCO2e (Xbox/Surface energy)","Medium","Product Engineering"],
+  ["Carbon","Supply Chain","Scope 3: Transport","Logistics Decarbonization","305,000 mtCO2e","Medium","Logistics Team"],
+  ["Carbon","Removal","Carbon Removal Contracted","Remove Historic Emissions","22 Million Tonnes (Cumulative)","Low","Carbon Removal Team"],
+  ["Carbon","Removal","Carbon Removal Delivered","Scale Market","~2.5M Tonnes (On track)","Medium","Carbon Removal Team"],
+  ["Energy","Renewables","Renewable Capacity Contracted","100% Coverage","34 GW Global Portfolio","Low","Energy Team"],
+  ["Energy","Renewables","New Capacity Added","Growth Pace","19 GW added in FY24","Low","Energy Team"],
+  ["Energy","Efficiency","Datacenter PUE","Target <1.2","1.12 Average (Industry Leading)","Low","Cloud Operations"],
+  ["Energy","Nuclear","Nuclear PPAs","Diversify Baseload","Signed first major deal (Constellation)","Medium","Energy Strategy"],
+  ["Water","Replenishment","Replenishment Volume","Water Positive by 2030",">100M m³ Contracted Lifetime","Low","Water Team"],
+  ["Water","Efficiency","Water Usage Effectiveness (WUE)","Reduce Consumption","0.49 L/kWh","Medium","Datacenter Design"],
+  ["Water","Projects","Replenishment Projects","Global Reach","76 Active Projects","Low","Water Team"],
+  ["Water","Access","WASH Access Provided","Community Support",">1.5M People Impacted","Low","Philanthropies"],
+  ["Waste","Operations","Operational Diversion Rate","90% Diversion","88.1% (Near Target)","Medium","Real Estate & Facilities"],
+  ["Waste","Circular Centers","Server Reuse/Recycle","90% Reuse","90.9% (Target Exceeded)","Low","Circular Centers Team"],
+  ["Waste","Construction","Construction Waste Diversion","75% Diversion","85.0% (Target Exceeded)","Low","Real Estate Construction"],
+  ["Waste","Plastics","Single-Use Plastics (Packaging)","Eliminate","Eliminated in all primary packaging","Low","Devices Packaging Team"],
+  ["Waste","Hardware","Device Recyclability","100% Recyclable","94.8% Rate","Medium","Devices Engineering"],
+  ["Ecosystems","Land","Land Protected","Protect > Used","15,849 acres (Exceeded by >30%)","Low","Real Estate"],
+  ["Ecosystems","Biodiversity","Datacenter Biodiversity","Net Positive","Benchmarks established for all new builds","Medium","Environmental Science Team"],
+];
+
+const SOC_DATA = [
+  ["Global Demographics","Women (Global)","31.6%","Yearly Growth","Increased 0.4% YoY; Slow steady progress.","Medium"],
+  ["Global Demographics","Women (Technical)","27.2%","Yearly Growth","Increased 0.5% YoY; Remains industry challenge.","High"],
+  ["Global Demographics","Women (Executive)","29.1%","Parity","Slight decrease; Critical area for succession planning.","Critical"],
+  ["Global Demographics","Women (Partner Level)","Increased","Growth","Maintained or grew representation.","Low"],
+  ["Global Demographics","Women (Management)","28.5%","Growth","Pipeline is strengthening.","Medium"],
+  ["US Demographics","Black / African American","6.6%","Double (2025)","Decreased 0.1% YoY in core workforce.","High"],
+  ["US Demographics","Black / AA (Leadership)","4.3%","Growth","Increased 0.5% YoY; Positive trend at top.","Medium"],
+  ["US Demographics","Hispanic / Latinx","8.0%","Growth","Increased 0.1% YoY.","Medium"],
+  ["US Demographics","Hispanic (Leadership)","4.6%","Growth","Slight growth observed.","Medium"],
+  ["US Demographics","Asian","37.8%","—","Largest demographic group in US.","Low"],
+  ["US Demographics","Asian (Leadership)","28.0%","—","Strong representation at leadership levels.","Low"],
+  ["US Demographics","Indigenous / Native American","0.6%","Growth","Flat YoY; Requires targeted outreach.","High"],
+  ["US Demographics","Multiracial","2.8%","—","Slight increase as self-ID improves.","Low"],
+  ["Inclusion","Disability (US)","9.0%","5-7% Benchmark","Exceeds benchmark; Strong self-ID culture.","Low"],
+  ["Inclusion","Disability (Global)","5.7%","Growth","Rolling out self-ID globally.","Medium"],
+  ["Inclusion","LGBTQI+ (US)","7.3%","—","Consistent representation.","Low"],
+  ["Inclusion","Military / Veterans","4.8%","—","Flat YoY.","Low"],
+  ["Pay Equity","Gender Pay (Global)","1.000","1.00 : 1.00","Full parity achieved.","Low"],
+  ["Pay Equity","Racial Pay (US)","1.000","1.00 : 1.00","Full parity achieved.","Low"],
+  ["Training","Allyship Awareness","95.6%","100%","High awareness of allyship concepts.","Low"],
+  ["Training","Compliance Training","99.0%","100%","Mandatory training completion.","Low"],
+  ["Sentiment","Inclusion Index","81.2%",">80%","High sentiment of belonging (+2.3% YoY).","Low"],
+  ["Hiring","Datacenter Growth","+23.9%","Meet Demand","Rapid scaling for AI infrastructure.","Medium"],
+  ["Skilling","GenAI Training","3 Million+","Reach 1M+","Exceeded external skilling targets.","Low"],
+  ["Community","Digital Skills Access","14.1 Million","Reach 10M+","Global learners accessed content.","Low"],
+];
+
+const GOV_DATA = [
+  ["Financial","Total Revenue (FY25)","$281.7 Billion","Annual Report","Record High","Low"],
+  ["Financial","Operating Income","$128.5 Billion","Annual Report","Up 17% YoY","Low"],
+  ["Financial","Azure Revenue Growth","34%","Quarterly Earnings","Strong Cloud Demand","Low"],
+  ["Financial","R&D Spend","$29.5 Billion","Innovation Budget","Invested in AI","Medium"],
+  ["Board","Board Size","12 Directors","Bylaws","Optimal","Low"],
+  ["Board","Independence","11 of 12 (91%)","Corporate Gov Guidelines","Exceeds NYSE reqs","Low"],
+  ["Board","Diversity (Gender/Ethnic)","50%","Diversity Policy","Compliant","Low"],
+  ["Board","Women Directors","33% (4 of 12)","Diversity Policy","Compliant","Low"],
+  ["Board","Average Tenure","6.5 Years","Refreshment Policy","Healthy Mix","Low"],
+  ["Board","Lead Independent Director","Sandra Peterson","Governance Guidelines","Active","Low"],
+  ["Committees","Audit Committee","4 Independent Members","Charter","Active Oversight","Low"],
+  ["Committees","Compensation Committee","4 Independent Members","Charter","Active Oversight","Low"],
+  ["Committees","Governance Committee","3 Independent Members","Charter","Active Oversight","Low"],
+  ["Ethics","Anti-Corruption Training","100% Completion","Standards of Business Conduct","Mandatory","Low"],
+  ["Ethics","Whistleblower Reports","Tracked Internally","Whistleblower Policy","Anonymous Channel Active","Medium"],
+  ["Security","Secure Future Initiative (SFI)","Launched","Global Security Mandate","Top Priority","Critical"],
+  ["Security","Dedicated Security Eng.","34,000 FTE Equivalent","SFI Resourcing","Deployed","High"],
+  ["Security","MFA Adoption","Enforced","Zero Trust Policy","Mandatory for Access","Low"],
+  ["Privacy","GDPR Compliance","Compliant","Global Privacy Standard","Ongoing","Medium"],
+  ["Privacy","Data Subject Requests",">10 Million","Privacy Dashboard","Automated Processing","Low"],
+  ["Responsible AI","Red Team Operations","67 Operations","RAI Standard","Executed Pre-Release","High"],
+  ["Responsible AI","Sensitive Use Reviews","77% GenAI Related","RAI Standard","High Volume","High"],
+  ["Responsible AI","RAI Fellows","Community Active","Internal Governance","Operational","Low"],
+  ["Policy","Political Spending","Disclosed Semiannually","MSPAC Policy","Transparent","Medium"],
+  ["Tax","Cash Taxes Paid","$23.0 Billion","Global Tax Policy","Paid","Low"],
+];
+
+const SUP_DATA = [
+  ["Supplier Code of Conduct","100% (Applicability)","Contract Terms","Yes","100%","Mandatory for all suppliers.","Low"],
+  ["SCoC Training","Managed Suppliers","LMS Records","Yes","Required","Compliance tracked annually.","Low"],
+  ["Carbon Reporting (Scope 3)","87% (by Spend)","CDP Supply Chain","Yes","87%","Gap is low-spend tail end.","Medium"],
+  ["Carbon Reduction Program","Top Suppliers","Contractual","Yes","Active","Suppliers required to reduce CO2.","High"],
+  ["Clean Energy Program","Strategic Suppliers","Training/Support","No","Expanding","Helping suppliers buy renewable.","Medium"],
+  ["Water Management","High Impact Suppliers","CDP Water","Yes","Targeted","Focus on water-stressed regions.","High"],
+  ["Waste Data Reporting","Hardware Suppliers","Annual Survey","No","Tracking","Improving data quality.","Medium"],
+  ["Conflict Minerals (3TG)","100% Smelters","CMRT Report","Yes","100%","100% Smelters identified/audited.","Low"],
+  ["Cobalt Sourcing","Battery Suppliers","Due Diligence","Yes","Mapped","Full supply chain mapping.","High"],
+  ["Human Rights Audits","Risk-Based Selection","On-site Audit Reports","Yes","Targeted","Focus on high-risk geos.","High"],
+  ["Forced Labor","All Suppliers","Screening Tools","Yes","0 Tolerance","Immediate remediation if found.","Critical"],
+  ["Working Hours","Factory Suppliers","Audit Checks","Yes","Monitored","Common non-conformance area.","Medium"],
+  ["Health & Safety","Factory Suppliers","Audit Checks","Yes","Monitored","Ensuring PPE and safety stds.","Medium"],
+  ["Supplier Diversity (US)","All Procurement","Spend Analytics","No",">$3 Billion","Exceeded spend targets.","Low"],
+  ["Woman-Owned Businesses","Diverse Suppliers","Spend Analytics","No","Tracked","Sub-category of diversity.","Low"],
+  ["Minority-Owned Businesses","Diverse Suppliers","Spend Analytics","No","Tracked","Sub-category of diversity.","Low"],
+  ["Veteran-Owned Businesses","Diverse Suppliers","Spend Analytics","No","Tracked","Sub-category of diversity.","Low"],
+  ["Packaging (FSC)","Paper Suppliers","Certificates","No","100%","All paper FSC certified.","Low"],
+  ["Packaging (Plastics)","Packaging Suppliers","Material Specs","No","<1%","Eliminating single-use plastics.","Low"],
+  ["Circular Centers","Logistics Providers","Ops Reports","No","6 Sites","Reverse logistics hubs active.","Low"],
+  ["Ocean Shipping","Logistics Providers","Fuel Records","Yes","SAF Testing","Moving to low-carbon fuels.","Medium"],
+  ["Air Transport","Logistics Providers","Fuel Records","Yes","SAF Adoption","High emissions channel.","High"],
+  ["Device Take-Back","Global Markets","Program Stats","No","Available","Consumer recycling options.","Low"],
+  ["Raw Material Sourcing","Mining Level","RMI Audits","Yes","Engaged","Upstream due diligence.","High"],
+  ["Supplier Corrective Action","Non-Conformant","CAP Reports","Yes","100%","All findings require CAP.","Low"],
+];
+
+// ═══════════════════════════════════════════════════════════
+//  CHART.JS GLOBAL DEFAULTS
+// ═══════════════════════════════════════════════════════════
+Chart.defaults.color = '#7070a0';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 10;
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.padding = 14;
+
+const COLORS = {
+  blue: '#00a4ef', green: '#7fba00', yellow: '#ffb900', red: '#f25022',
+  blueA: 'rgba(0,164,239,0.7)', greenA: 'rgba(127,186,0,0.7)',
+  yellowA: 'rgba(255,185,0,0.7)', redA: 'rgba(242,80,34,0.7)',
+  critical: '#f25022', high: '#ffb900', medium: '#00a4ef', low: '#7fba00',
+};
+
+function priorityColor(p) {
+  return { Critical: COLORS.critical, High: COLORS.high, Medium: COLORS.medium, Low: COLORS.low }[p] || '#7070a0';
+}
+function priorityColorA(p, a=0.7) {
+  const c = { Critical: '242,80,34', High: '255,185,0', Medium: '0,164,239', Low: '127,186,0' }[p];
+  return c ? `rgba(${c},${a})` : `rgba(100,100,150,${a})`;
+}
+
+// ── ENV CHARTS ──
+(function() {
+  // Priority donut
+  const prios = ['Critical','High','Medium','Low'];
+  const pCount = prios.map(p => ENV_DATA.filter(r=>r[5]===p).length);
+  new Chart(document.getElementById('envPriorityChart'), {
+    type: 'doughnut',
+    data: { labels: prios, datasets: [{ data: pCount,
+      backgroundColor: prios.map(p=>priorityColorA(p,0.85)),
+      borderColor: prios.map(p=>priorityColor(p)), borderWidth: 1.5 }] },
+    options: { cutout:'65%', plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{
+      label: ctx => ` ${ctx.label}: ${ctx.raw} items`
+    }}} }
+  });
+
+  // Category bar
+  const cats = ['Carbon','Energy','Water','Waste','Ecosystems'];
+  const catCount = cats.map(c => ENV_DATA.filter(r=>r[0]===c).length);
+  new Chart(document.getElementById('envCategoryChart'), {
+    type: 'bar',
+    data: { labels: cats, datasets: [{ label:'KPI Items',
+      data: catCount,
+      backgroundColor: [COLORS.redA, COLORS.yellowA, COLORS.blueA, COLORS.greenA, 'rgba(160,100,240,0.7)'],
+      borderRadius: 6, borderSkipped: false }] },
+    options: { plugins:{ legend:{ display:false } }, scales:{
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ stepSize:1 } },
+      x:{ grid:{ display:false } }
+    }}
+  });
+
+  // Emissions horizontal bar
+  new Chart(document.getElementById('emissionsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Scope 2\n(Location)', 'Scope 3\nPurchased Goods', 'Scope 3\nSold Products', 'Scope 3\nTransport', 'Scope 2\n(Market)', 'Carbon Removal\nDelivered'],
+      datasets: [{
+        label: 'Estimated mtCO₂e',
+        data: [9955368, 8100000, 2100000, 305000, 456119, 2500000],
+        backgroundColor: [COLORS.redA, 'rgba(242,80,34,0.5)', 'rgba(255,185,0,0.7)',
+          COLORS.yellowA, COLORS.blueA, COLORS.greenA],
+        borderRadius: 5, borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ callback: v => (v/1e6).toFixed(1)+'M' } },
+        y:{ grid:{ display:false } }
+      }
+    }
+  });
+})();
+
+// ── SOC CHARTS ──
+(function() {
+  new Chart(document.getElementById('womenChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Global','Technical','Executive','Management','Partner Lvl'],
+      datasets: [{
+        label: 'Women %',
+        data: [31.6, 27.2, 29.1, 28.5, null],
+        backgroundColor: COLORS.blueA, borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, max:50, ticks:{ callback: v=>v+'%' } },
+      x:{ grid:{ display:false } }
+    }}
+  });
+
+  new Chart(document.getElementById('diversityChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Asian','Hispanic','Black/AA','Multi-racial','Native\nAmerican'],
+      datasets: [{
+        label: 'US %',
+        data: [37.8, 8.0, 6.6, 2.8, 0.6],
+        backgroundColor: [COLORS.yellowA, COLORS.greenA, COLORS.redA, COLORS.blueA, 'rgba(160,100,240,0.7)'],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ callback: v=>v+'%' } },
+      x:{ grid:{ display:false } }
+    }}
+  });
+
+  const mods = ['Critical','High','Medium','Low'];
+  const modCounts = mods.map(m => SOC_DATA.filter(r=>r[5]===m).length);
+  new Chart(document.getElementById('socModChart'), {
+    type: 'bar',
+    data: {
+      labels: SOC_DATA.map(r=>r[1]),
+      datasets: [{
+        label: 'Moderation',
+        data: SOC_DATA.map(r=>({ Critical:4, High:3, Medium:2, Low:1 }[r[5]]||0)),
+        backgroundColor: SOC_DATA.map(r=>priorityColorA(r[5],0.75)),
+        borderRadius: 4, borderSkipped: false
+      }]
+    },
+    options: {
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
+        label: ctx => ` ${SOC_DATA[ctx.dataIndex][5]}`
+      }}},
+      scales:{
+        y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ callback: v=>['','Low','Medium','High','Critical'][v]||'' }, max:4.5, min:0 },
+        x:{ grid:{ display:false }, ticks:{ maxRotation:45, font:{ size:8 } } }
+      }
+    }
+  });
+})();
+
+// ── GOV CHARTS ──
+(function() {
+  const risks = ['Critical','High','Medium','Low'];
+  const rCount = risks.map(r => GOV_DATA.filter(d=>d[5]===r).length);
+  new Chart(document.getElementById('govRiskChart'), {
+    type: 'doughnut',
+    data: { labels: risks, datasets:[{ data: rCount,
+      backgroundColor: risks.map(r=>priorityColorA(r,0.85)),
+      borderColor: risks.map(r=>priorityColor(r)), borderWidth: 1.5
+    }]},
+    options:{ cutout:'65%', plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  new Chart(document.getElementById('govFinChart'), {
+    type: 'bar',
+    data:{
+      labels:['Revenue','Operating\nIncome','R&D\nSpend','Cash Taxes\nPaid'],
+      datasets:[{ label:'$B',
+        data:[281.7, 128.5, 29.5, 23.0],
+        backgroundColor:[COLORS.greenA, COLORS.blueA, COLORS.yellowA, COLORS.redA],
+        borderRadius:6, borderSkipped:false
+      }]
+    },
+    options:{ plugins:{ legend:{ display:false } }, scales:{
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ callback: v=>'$'+v+'B' } },
+      x:{ grid:{ display:false } }
+    }}
+  });
+
+  const areas = [...new Set(GOV_DATA.map(r=>r[0]))];
+  const areaCounts = areas.map(a => GOV_DATA.filter(r=>r[0]===a).length);
+  new Chart(document.getElementById('govAreaChart'), {
+    type: 'bar',
+    data:{
+      labels: areas,
+      datasets:[{ label:'Metrics',
+        data: areaCounts,
+        backgroundColor: [COLORS.blueA, COLORS.yellowA, COLORS.greenA, COLORS.redA,
+          'rgba(160,100,240,0.7)', COLORS.blueA, 'rgba(255,120,50,0.7)', COLORS.greenA, COLORS.yellowA],
+        borderRadius:6, borderSkipped:false
+      }]
+    },
+    options:{ plugins:{ legend:{ display:false } }, scales:{
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ stepSize:1 } },
+      x:{ grid:{ display:false } }
+    }}
+  });
+})();
+
+// ── SUP CHARTS ──
+(function() {
+  const mods = ['Critical','High','Medium','Low'];
+  const mc = mods.map(m=>SUP_DATA.filter(r=>r[6]===m).length);
+  new Chart(document.getElementById('supModChart'), {
+    type:'doughnut',
+    data:{ labels:mods, datasets:[{ data:mc,
+      backgroundColor: mods.map(m=>priorityColorA(m,0.85)),
+      borderColor: mods.map(m=>priorityColor(m)), borderWidth:1.5
+    }]},
+    options:{ cutout:'65%', plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  const hrYes = SUP_DATA.filter(r=>r[3]==='Yes').length;
+  const hrNo = SUP_DATA.length - hrYes;
+  new Chart(document.getElementById('supHighRiskChart'), {
+    type:'doughnut',
+    data:{ labels:['High-Risk Assessed','Not Assessed'],
+      datasets:[{ data:[hrYes, hrNo],
+        backgroundColor:[COLORS.greenA, 'rgba(100,100,150,0.4)'],
+        borderColor:[COLORS.green, 'rgba(100,100,150,0.6)'], borderWidth:1.5
+      }]
+    },
+    options:{ cutout:'65%', plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{
+      label: ctx => ` ${ctx.label}: ${ctx.raw} items`
+    }}}}
+  });
+
+  new Chart(document.getElementById('supBarChart'), {
+    type:'bar',
+    data:{
+      labels: SUP_DATA.map(r=>r[0]),
+      datasets:[{
+        label: 'Risk Level',
+        data: SUP_DATA.map(r=>({ Critical:4, High:3, Medium:2, Low:1 }[r[6]]||0)),
+        backgroundColor: SUP_DATA.map(r=>priorityColorA(r[6],0.75)),
+        borderRadius:4, borderSkipped:false
+      }]
+    },
+    options:{
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
+        label: ctx=>' '+SUP_DATA[ctx.dataIndex][6]
+      }}},
+      scales:{
+        y:{ grid:{ color:'rgba(255,255,255,0.05)' }, max:4.5, min:0,
+          ticks:{ callback: v=>['','Low','Medium','High','Critical'][v]||'' } },
+        x:{ grid:{ display:false }, ticks:{ maxRotation:50, font:{ size:8 } } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  TABLE ENGINE
+// ═══════════════════════════════════════════════════════════
+const PAGE_SIZE = 8;
+const state = {
+  env: { data: ENV_DATA, filtered: [...ENV_DATA], page: 0, sortCol: -1, sortDir: 1 },
+  soc: { data: SOC_DATA, filtered: [...SOC_DATA], page: 0, sortCol: -1, sortDir: 1 },
+  gov: { data: GOV_DATA, filtered: [...GOV_DATA], page: 0, sortCol: -1, sortDir: 1 },
+  sup: { data: SUP_DATA, filtered: [...SUP_DATA], page: 0, sortCol: -1, sortDir: 1 },
+};
+
+function badgePriority(p) {
+  const cl = (p||'').toLowerCase().replace('critical','critical').replace('high','high').replace('medium','medium').replace('low','low');
+  return `<span class="badge ${cl}">${p||'—'}</span>`;
+}
+function badgeYN(v) {
+  const cl = v==='Yes'?'yes':'no';
+  return `<span class="badge ${cl}">${v}</span>`;
+}
+
+function renderEnvRow(r) {
+  return `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td style="color:var(--muted);font-size:10px">${r[3]}</td><td style="font-size:10px">${r[4]}</td><td>${badgePriority(r[5])}</td><td style="color:var(--muted);font-size:10px">${r[6]}</td>`;
+}
+function renderSocRow(r) {
+  return `<td>${r[0]}</td><td>${r[1]}</td><td style="color:var(--ms-blue);font-family:'Syne',sans-serif;font-weight:700">${r[2]}</td><td style="color:var(--muted);font-size:10px">${r[3]}</td><td style="font-size:10px">${r[4]}</td><td>${badgePriority(r[5])}</td>`;
+}
+function renderGovRow(r) {
+  return `<td>${r[0]}</td><td>${r[1]}</td><td style="color:var(--ms-yellow);font-family:'Syne',sans-serif;font-weight:700">${r[2]}</td><td style="color:var(--muted);font-size:10px">${r[3]}</td><td style="font-size:10px">${r[4]}</td><td>${badgePriority(r[5])}</td>`;
+}
+function renderSupRow(r) {
+  return `<td>${r[0]}</td><td style="color:var(--muted);font-size:10px">${r[1]}</td><td style="color:var(--muted);font-size:10px">${r[2]}</td><td>${badgeYN(r[3])}</td><td style="color:var(--ms-green);font-family:'Syne',sans-serif">${r[4]}</td><td style="font-size:10px">${r[5]}</td><td>${badgePriority(r[6])}</td>`;
+}
+
+const renderers = { env: renderEnvRow, soc: renderSocRow, gov: renderGovRow, sup: renderSupRow };
+
+function renderTable(key) {
+  const s = state[key];
+  const tbody = document.getElementById(`${key}-tbody`);
+  const start = s.page * PAGE_SIZE;
+  const slice = s.filtered.slice(start, start + PAGE_SIZE);
+  tbody.innerHTML = slice.map(r => `<tr>${renderers[key](r)}</tr>`).join('') ||
+    '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px">No results found</td></tr>';
+  renderPagination(key);
+}
+
+function renderPagination(key) {
+  const s = state[key];
+  const total = Math.ceil(s.filtered.length / PAGE_SIZE);
+  const el = document.getElementById(`${key}-pages`);
+  let html = `<span>${s.filtered.length} items</span><span style="flex:1"></span>`;
+  html += `<button class="page-btn" onclick="goPage('${key}',-1)" ${s.page===0?'disabled':''}>← Prev</button>`;
+  for (let i=0; i<total; i++) {
+    if (total <= 7 || Math.abs(i - s.page) <= 1 || i===0 || i===total-1) {
+      html += `<button class="page-btn ${i===s.page?'active':''}" onclick="goPage('${key}',${i},true)">${i+1}</button>`;
+    } else if (Math.abs(i - s.page) === 2) {
+      html += `<span style="color:var(--muted)">…</span>`;
+    }
+  }
+  html += `<button class="page-btn" onclick="goPage('${key}',1)" ${s.page>=total-1?'disabled':''}>Next →</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(key, val, absolute=false) {
+  const s = state[key];
+  const total = Math.ceil(s.filtered.length / PAGE_SIZE);
+  s.page = absolute ? val : Math.max(0, Math.min(total-1, s.page + val));
+  renderTable(key);
+}
+
+function filterTable(key) {
+  const s = state[key];
+  const search = (document.getElementById(`${key}-search`)?.value||'').toLowerCase();
+  let filtered = s.data.filter(r => r.some(v => String(v).toLowerCase().includes(search)));
+
+  if (key==='env') {
+    const p = document.getElementById('env-filter-priority').value;
+    const c = document.getElementById('env-filter-cat').value;
+    if (p) filtered = filtered.filter(r=>r[5]===p);
+    if (c) filtered = filtered.filter(r=>r[0]===c);
+  } else if (key==='soc') {
+    const a = document.getElementById('soc-filter-area').value;
+    const m = document.getElementById('soc-filter-mod').value;
+    if (a) filtered = filtered.filter(r=>r[0]===a);
+    if (m) filtered = filtered.filter(r=>r[5]===m);
+  } else if (key==='gov') {
+    const a = document.getElementById('gov-filter-area').value;
+    const r = document.getElementById('gov-filter-risk').value;
+    if (a) filtered = filtered.filter(d=>d[0]===a);
+    if (r) filtered = filtered.filter(d=>d[5]===r);
+  } else if (key==='sup') {
+    const m = document.getElementById('sup-filter-mod').value;
+    const r = document.getElementById('sup-filter-risk').value;
+    if (m) filtered = filtered.filter(d=>d[6]===m);
+    if (r) filtered = filtered.filter(d=>d[3]===r);
+  }
+
+  s.filtered = filtered;
+  s.page = 0;
+  renderTable(key);
+}
+
+function sortTable(key, col) {
+  const s = state[key];
+  s.sortDir = s.sortCol === col ? -s.sortDir : 1;
+  s.sortCol = col;
+  s.filtered.sort((a,b) => String(a[col]).localeCompare(String(b[col])) * s.sortDir);
+  renderTable(key);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TAB SWITCHER
+// ═══════════════════════════════════════════════════════════
+function switchTab(key) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab-btn.${key}`).classList.add('active');
+  document.getElementById(`panel-${key}`).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+['env','soc','gov','sup'].forEach(k => renderTable(k));
+</script>
+</body>
+</html>
